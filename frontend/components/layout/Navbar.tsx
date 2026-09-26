@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
+
 export function Navbar() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-warm-white/90 backdrop-blur-sm border-b border-light-gray">
@@ -14,7 +15,9 @@ export function Navbar() {
           <Link href="/appointments" className="hover:text-medium-gray transition-colors">Appointments</Link>
           <Link href="/history" className="hover:text-medium-gray transition-colors">History</Link>
         </nav>
-        <Button variant="primary" size="sm">Book Service</Button>
+        <Link href="/book">
+          <Button variant="primary" size="sm">Book Service</Button>
+        </Link>
         {/* mobile: показать только logo + burger — добавим Drawer в PHASE 13 */}
       </div>
     </header>

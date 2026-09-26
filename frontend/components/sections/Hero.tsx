@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 export function Hero() {
@@ -12,7 +13,9 @@ export function Hero() {
         <p className="text-medium-gray text-lg mb-10 max-w-xl mx-auto">
           Professional automotive service management for your vehicle.
         </p>
-        <Button variant="primary" size="lg">Book a Service</Button>
+        <Link href="/book">
+          <Button variant="primary" size="lg">Book a Service</Button>
+        </Link>
       </div>
 
       <div className="relative w-full max-w-5xl mx-auto mt-16 aspect-[16/9] px-6">
