@@ -1,5 +1,6 @@
 from tests.conftest import create_user, auth_headers
 from app.models.user import UserRole
+from app.models.appointment import Appointment
 
 def test_client_cannot_access_other_client_car(client, db_session):
     create_user(db_session, "alice@example.com")
@@ -70,9 +71,11 @@ def test_full_appointment_flow(client, db_session):
 def test_cannot_start_appointment_that_is_still_pending(client, db_session):
     admin = create_user(db_session, "admin@example.com", role=UserRole.admin)
     client_user = create_user(db_session, "client@example.com")
+    master = create_user(db_session, "master@example.com", role=UserRole.master)
 
     admin_headers = auth_headers(client, "admin@example.com")
     client_headers = auth_headers(client, "client@example.com")
+    master_headers = auth_headers(client, "master@example.com")
 
     bay = client.post("/bays", json={"name": "Пост 1"}, headers=admin_headers).json()
     service = client.post(
@@ -91,7 +94,11 @@ def test_cannot_start_appointment_that_is_still_pending(client, db_session):
         headers=client_headers,
     ).json()
 
-    resp = client.post(f"/appointments/{appt['id']}/start", headers=client_headers)
+    db_appt = db_session.query(Appointment).filter(Appointment.id == appt["id"]).first()
+    db_appt.master_id = master.id
+    db_session.commit()
+
+    resp = client.post(f"/appointments/{appt['id']}/start", headers=master_headers)
     assert resp.status_code == 409
 
 def test_cannot_double_book_same_bay(client, db_session):
@@ -133,4 +140,3 @@ def test_cannot_double_book_same_bay(client, db_session):
         headers=headers2,
     )
     assert resp2.status_code == 409
-
