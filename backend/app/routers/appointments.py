@@ -56,7 +56,7 @@ def create_appointment(
             Appointment.start_at < end_at,
             Appointment.end_at > data.start_at,
         )
-        .with_for_update()
+        # .with_for_update()
         .first()
     )
     if conflicting:
