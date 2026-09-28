@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
+from sqlalchemy import func
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -76,6 +77,17 @@ def create_appointment(
     db.commit()
     db.refresh(appointment)
     return appointment
+
+@router.get("", response_model=list[AppointmentOut])
+def list_appointments(
+    on_date: date | None = None,
+    db: Session = Depends(get_db),
+    _staff=Depends(require_role(UserRole.manager, UserRole.admin)),
+):
+    query = db.query(Appointment)
+    if on_date:
+        query = query.filter(func.date(Appointment.start_at) == on_date)
+    return query.order_by(Appointment.start_at).all()
 
 @router.get("/my", response_model=list[AppointmentOut])
 def my_appointments(

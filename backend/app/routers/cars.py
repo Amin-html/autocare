@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.core.deps import get_current_user
-from app.models.user import User
+from app.core.deps import get_current_user, require_role
+from app.models.user import User, UserRole
 from app.models.car import Car
 from app.schemas.car import CarCreate, CarOut
 
@@ -16,6 +16,12 @@ def list_my_cars(
 ):
     return db.query(Car).filter(Car.owner_id == current_user.id).all()
 
+@router.get("/all", response_model=list[CarOut])
+def list_all_cars(
+    db: Session = Depends(get_db),
+    _staff=Depends(require_role(UserRole.manager, UserRole.admin)),
+):
+    return db.query(Car).all()
 
 @router.post("", response_model=CarOut, status_code=status.HTTP_201_CREATED)
 def add_car(
