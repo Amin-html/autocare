@@ -16,17 +16,19 @@ export function useRequireRole(roles: User["role"][]) {
   const { user, loading } = useAuth();
   const router = useRouter();
 
+  const allowed = !!user && roles.includes(user.role);
+  const rolesKey = roles.join(",");
+
   useEffect(() => {
     if (loading) return;
     if (!user) {
       router.push("/login");
       return;
     }
-    if (!roles.includes(user.role)) {
-      // роль не подходит для этой секции — отправляем в "родной" раздел пользователя
+    if (!allowed) {
       router.push(roleHome[user.role]);
     }
-  }, [user, loading, roles, router]);
+  }, [user, loading, allowed, rolesKey, router]);
 
-  return { user, loading };
+  return { user, loading, allowed };
 }

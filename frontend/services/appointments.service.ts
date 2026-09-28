@@ -17,6 +17,8 @@ export interface Appointment {
 
 export const appointmentsService = {
   my: () => api.get<Appointment[]>("/appointments/my"),
+  listAll: (onDate?: string) =>
+    api.get<Appointment[]>(`/appointments${onDate ? `?on_date=${onDate}` : ""}`),
   create: (data: {
     car_id: number;
     service_id: number;
@@ -25,4 +27,6 @@ export const appointmentsService = {
     complaint?: string;
   }) => api.post<Appointment>("/appointments", data),
   cancel: (id: number) => api.post<Appointment>(`/appointments/${id}/cancel`),
+  confirm: (id: number, masterId?: number) =>
+    api.post<Appointment>(`/appointments/${id}/confirm${masterId ? `?master_id=${masterId}` : ""}`),
 };
