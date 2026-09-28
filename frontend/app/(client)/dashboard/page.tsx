@@ -14,18 +14,25 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user || user.role !== "client") return;
+
     Promise.all([carsService.list(), appointmentsService.my()])
       .then(([carsData, apptsData]) => {
         setCars(carsData);
         setAppointments(apptsData);
       })
+      .catch(() => {
+        // роль сменится/редирект сработает — молча игнорируем, не роняя UI
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
 
   if (loading) return <div className="py-24 text-center text-medium-gray">Loading...</div>;
 
   const myCar = cars[0];
-  const upcoming = appointments.filter((a) => ["pending", "confirmed", "in_progress"].includes(a.status));
+  const upcoming = appointments.filter((a) =>
+    ["pending", "confirmed", "in_progress"].includes(a.status)
+  );
 
   return (
     <div className="pb-24">
