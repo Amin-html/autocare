@@ -130,3 +130,21 @@ def get_work_order(
         raise HTTPException(status_code=403, detail="Нет доступа к этому заказ-наряду")
 
     return work_order
+
+@router.get("/by-appointment/{appointment_id}", response_model=WorkOrderOut | None)
+def get_work_order_by_appointment(
+    appointment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    appt = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+    if not appt:
+        raise HTTPException(status_code=404, detail="Запись не найдена")
+
+    is_owner = appt.client_id == current_user.id
+    is_master = appt.master_id == current_user.id
+    is_staff = current_user.role in (UserRole.manager, UserRole.admin)
+    if not (is_owner or is_master or is_staff):
+        raise HTTPException(status_code=403, detail="Нет доступа к этой записи")
+
+    return db.query(WorkOrder).filter(WorkOrder.appointment_id == appointment_id).first()

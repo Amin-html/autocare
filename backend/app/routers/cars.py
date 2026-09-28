@@ -19,7 +19,7 @@ def list_my_cars(
 @router.get("/all", response_model=list[CarOut])
 def list_all_cars(
     db: Session = Depends(get_db),
-    _staff=Depends(require_role(UserRole.manager, UserRole.admin)),
+    _staff=Depends(require_role(UserRole.manager, UserRole.master, UserRole.admin)),
 ):
     return db.query(Car).all()
 
