@@ -3,8 +3,8 @@
 import { useRequireRole } from "@/hooks/useRole";
 import { StaffHeader } from "@/components/layout/StaffHeader";
 
-export default function ManagerLayout({ children }: { children: React.ReactNode }) {
-  const { loading, allowed } = useRequireRole(["manager", "admin"]);
+export default function MasterLayout({ children }: { children: React.ReactNode }) {
+  const { loading, allowed } = useRequireRole(["master", "admin"]);
 
   if (loading || !allowed) {
     return (
@@ -16,7 +16,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="min-h-screen bg-deep-black text-white">
-      <StaffHeader section="Dispatch" />
+      <StaffHeader section="Workshop" />
       {children}
     </div>
   );
