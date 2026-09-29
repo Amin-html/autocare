@@ -9,4 +9,5 @@ export interface Bay {
 
 export const baysService = {
   list: () => api.get<Bay[]>("/bays"),
+  create: (data: { name: string; is_active?: boolean }) => api.post<Bay>("/bays", data),
 };

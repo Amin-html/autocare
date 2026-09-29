@@ -1,4 +1,3 @@
-// services/services.service.ts
 import { api } from "@/lib/api";
 
 export interface ServiceItem {
@@ -10,4 +9,6 @@ export interface ServiceItem {
 
 export const servicesService = {
   list: () => api.get<ServiceItem[]>("/services"),
+  create: (data: { name: string; base_price: number; duration_minutes: number }) =>
+    api.post<ServiceItem>("/services", data),
 };
