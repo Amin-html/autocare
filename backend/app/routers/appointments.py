@@ -89,6 +89,13 @@ def list_appointments(
         query = query.filter(func.date(Appointment.start_at) == on_date)
     return query.order_by(Appointment.start_at).all()
 
+@router.get("/my", response_model=list[AppointmentOut])
+def my_appointments(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return db.query(Appointment).filter(Appointment.client_id == current_user.id).all()
+
 @router.get("/{appointment_id}", response_model=AppointmentOut)
 def get_appointment(
     appointment_id: int,
@@ -106,13 +113,6 @@ def get_appointment(
         raise HTTPException(status_code=403, detail="Нет доступа к этой записи")
 
     return appt
-
-@router.get("/my", response_model=list[AppointmentOut])
-def my_appointments(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    return db.query(Appointment).filter(Appointment.client_id == current_user.id).all()
 
 @router.get("/assigned", response_model=list[AppointmentOut])
 def assigned_appointments(
