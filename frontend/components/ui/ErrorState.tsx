@@ -7,16 +7,21 @@ function describeError(error: unknown): { title: string; message: string } {
   const status = error instanceof ApiError ? error.status : undefined;
   const detail = error instanceof Error ? error.message : undefined;
 
-  switch (status) {
+    switch (status) {
+    case 0:
+        return {
+        title: "Offline",
+        message: detail || "Can't reach the server. Check your connection and try again.",
+        };
     case 403:
-      return { title: "No access", message: detail || "You don't have permission to view this." };
+        return { title: "No access", message: detail || "You don't have permission to view this." };
     case 404:
-      return { title: "Not found", message: detail || "This item doesn't exist or was removed." };
+        return { title: "Not found", message: detail || "This item doesn't exist or was removed." };
     case 401:
-      return { title: "Session expired", message: "Please sign in again." };
+        return { title: "Session expired", message: "Please sign in again." };
     default:
-      return { title: "Something went wrong", message: detail || "Please try again in a moment." };
-  }
+        return { title: "Something went wrong", message: detail || "Please try again in a moment." };
+    }
 }
 
 export function ErrorState({

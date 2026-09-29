@@ -9,20 +9,46 @@ export class ApiError extends Error {
   }
 }
 
+function extractDetail(body: unknown): string | undefined {
+  if (!body || typeof body !== "object") return undefined;
+  const detail = (body as { detail?: unknown }).detail;
+
+  if (typeof detail === "string") return detail;
+
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) =>
+        item && typeof item === "object" && "msg" in item
+          ? String((item as { msg: unknown }).msg)
+          : String(item)
+      )
+      .join("; ");
+  }
+
+  if (detail && typeof detail === "object") return JSON.stringify(detail);
+
+  return undefined;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+    });
+  } catch {
+    throw new ApiError(0, "Can't reach the server. Check your connection and try again.");
+  }
 
   if (res.status === 401 && typeof window !== "undefined") {
     localStorage.removeItem("token");
@@ -32,8 +58,9 @@ async function request<T>(
   }
 
   if (!res.ok) {
-    const body = await res.json().catch(() => ({ detail: "Unknown error" }));
-    throw new ApiError(res.status, body.detail || `Request failed: ${res.status}`);
+    const body = await res.json().catch(() => null);
+    const detail = extractDetail(body);
+    throw new ApiError(res.status, detail || `Request failed: ${res.status}`);
   }
 
   if (res.status === 204) return undefined as T;
