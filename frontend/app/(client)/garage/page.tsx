@@ -3,22 +3,42 @@
 import { useEffect, useState } from "react";
 import { carsService, Car } from "@/services/cars.service";
 import { appointmentsService, Appointment } from "@/services/appointments.service";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { ErrorState } from "@/components/ui/ErrorState";
 
 export default function GaragePage() {
   const [cars, setCars] = useState<Car[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
 
-  useEffect(() => {
+  function load() {
+    setLoading(true);
+    setError(null);
     Promise.all([carsService.list(), appointmentsService.my()])
       .then(([carsData, apptsData]) => {
         setCars(carsData);
         setAppointments(apptsData);
       })
+      .catch(setError)
       .finally(() => setLoading(false));
-  }, []);
+  }
 
-  if (loading) return <div className="py-24 text-center text-medium-gray">Loading...</div>;
+  useEffect(load, []);
+
+  if (loading) {
+    return (
+      <div className="pb-24">
+        <Skeleton className="h-3 w-24 mb-3" />
+        <Skeleton className="h-9 w-64 mb-2" />
+        <Skeleton className="h-4 w-40 mb-10" />
+        <Skeleton className="h-24 w-full mb-16" />
+        <Skeleton className="h-16 w-full" />
+      </div>
+    );
+  }
+
+  if (error) return <ErrorState error={error} onRetry={load} />;
 
   const car = cars[0];
 

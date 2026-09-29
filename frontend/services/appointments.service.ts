@@ -18,6 +18,7 @@ export interface Appointment {
 export const appointmentsService = {
   my: () => api.get<Appointment[]>("/appointments/my"),
   assigned: () => api.get<Appointment[]>("/appointments/assigned"),
+  get: (id: number) => api.get<Appointment>(`/appointments/${id}`),
   listAll: (onDate?: string) =>
     api.get<Appointment[]>(`/appointments${onDate ? `?on_date=${onDate}` : ""}`),
   create: (data: {

@@ -1,7 +1,12 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-interface ApiError {
-  detail: string;
+export class ApiError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
 }
 
 async function request<T>(
@@ -19,9 +24,16 @@ async function request<T>(
     },
   });
 
+  if (res.status === 401 && typeof window !== "undefined") {
+    localStorage.removeItem("token");
+    if (!window.location.pathname.startsWith("/login")) {
+      window.location.href = "/login";
+    }
+  }
+
   if (!res.ok) {
-    const error: ApiError = await res.json().catch(() => ({ detail: "Unknown error" }));
-    throw new Error(error.detail || `Request failed: ${res.status}`);
+    const body = await res.json().catch(() => ({ detail: "Unknown error" }));
+    throw new ApiError(res.status, body.detail || `Request failed: ${res.status}`);
   }
 
   if (res.status === 204) return undefined as T;

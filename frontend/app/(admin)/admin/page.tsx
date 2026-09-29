@@ -2,6 +2,11 @@ import Link from "next/link";
 
 const sections = [
   {
+    href: "/admin/appointments",
+    title: "Appointments",
+    description: "Every booking, any date, with status and work order.",
+  },
+  {
     href: "/admin/users",
     title: "Users",
     description: "View accounts and change roles.",

@@ -1,5 +1,7 @@
 "use client";
 
+import { Skeleton } from "@/components/ui/Skeleton";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { carsService, Car } from "@/services/cars.service";
@@ -18,9 +20,12 @@ export default function BookServicePage() {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [bays, setBays] = useState<Bay[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
 
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
-  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
+    null,
+  );
   const [selectedBayId, setSelectedBayId] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -29,27 +34,45 @@ export default function BookServicePage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    Promise.all([carsService.list(), servicesService.list(), baysService.list()])
+  function loadCatalog() {
+    setLoading(true);
+    setLoadError(null);
+    Promise.all([
+      carsService.list(),
+      servicesService.list(),
+      baysService.list(),
+    ])
       .then(([carsData, servicesData, baysData]) => {
         setCars(carsData);
         setServices(servicesData);
         setBays(baysData.filter((b) => b.is_active));
         if (carsData.length === 1) setSelectedCarId(carsData[0].id);
       })
+      .catch(setLoadError)
       .finally(() => setLoading(false));
-  }, []);
+  }
+
+  useEffect(loadCatalog, []);
 
   const selectedCar = cars.find((c) => c.id === selectedCarId);
   const selectedService = services.find((s) => s.id === selectedServiceId);
   const selectedBay = bays.find((b) => b.id === selectedBayId);
 
   async function handleConfirm() {
-    if (!selectedCarId || !selectedServiceId || !selectedBayId || !selectedDate || !selectedTime) return;
+    if (
+      !selectedCarId ||
+      !selectedServiceId ||
+      !selectedBayId ||
+      !selectedDate ||
+      !selectedTime
+    )
+      return;
     setError(null);
     setSubmitting(true);
     try {
-      const startAt = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
+      const startAt = new Date(
+        `${selectedDate}T${selectedTime}:00`,
+      ).toISOString();
       await appointmentsService.create({
         car_id: selectedCarId,
         service_id: selectedServiceId,
@@ -65,29 +88,53 @@ export default function BookServicePage() {
     }
   }
 
-  if (loading) return <div className="py-24 text-center text-medium-gray">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="pb-24 max-w-3xl mx-auto">
+        <Skeleton className="h-3 w-24 mb-3 mx-auto" />
+        <Skeleton className="h-8 w-64 mb-12 mx-auto" />
+        <div className="flex flex-col gap-4">
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) return <ErrorState error={loadError} onRetry={loadCatalog} />;
 
   return (
     <div className="pb-24 max-w-3xl mx-auto">
-      <p className="label-uppercase text-medium-gray mb-2 text-center">Autocare</p>
+      <p className="label-uppercase text-medium-gray mb-2 text-center">
+        Autocare
+      </p>
       <h1 className="text-3xl font-bold mb-12 text-center">BOOK A SERVICE</h1>
 
       <BookingStepper current={step} />
 
       {step === 0 && (
         <div className="flex flex-col gap-4">
-          {cars.length === 0 && <p className="text-medium-gray">No vehicles in your garage.</p>}
+          {cars.length === 0 && (
+            <p className="text-medium-gray">No vehicles in your garage.</p>
+          )}
           {cars.map((car) => (
             <button
               key={car.id}
               onClick={() => setSelectedCarId(car.id)}
               className={cn(
                 "text-left border rounded-md p-6 transition-colors",
-                selectedCarId === car.id ? "border-black" : "border-light-gray hover:border-medium-gray"
+                selectedCarId === car.id
+                  ? "border-black"
+                  : "border-light-gray hover:border-medium-gray",
               )}
             >
-              <p className="text-xl font-medium">{car.make} {car.model}</p>
-              <p className="text-medium-gray text-sm">{car.year} / {car.mileage.toLocaleString()} KM</p>
+              <p className="text-xl font-medium">
+                {car.make} {car.model}
+              </p>
+              <p className="text-medium-gray text-sm">
+                {car.year} / {car.mileage.toLocaleString()} KM
+              </p>
             </button>
           ))}
           <Button
@@ -110,19 +157,30 @@ export default function BookServicePage() {
               onClick={() => setSelectedServiceId(service.id)}
               className={cn(
                 "text-left border rounded-md p-6 flex justify-between items-center transition-colors",
-                selectedServiceId === service.id ? "border-black" : "border-light-gray hover:border-medium-gray"
+                selectedServiceId === service.id
+                  ? "border-black"
+                  : "border-light-gray hover:border-medium-gray",
               )}
             >
               <div>
                 <p className="text-lg font-medium">{service.name}</p>
-                <p className="text-medium-gray text-sm">{service.duration_minutes} min</p>
+                <p className="text-medium-gray text-sm">
+                  {service.duration_minutes} min
+                </p>
               </div>
               <p className="text-lg">${service.base_price}</p>
             </button>
           ))}
           <div className="flex gap-4 mt-4">
-            <Button variant="secondary" size="lg" onClick={() => setStep(0)}>Back</Button>
-            <Button variant="primary" size="lg" disabled={!selectedServiceId} onClick={() => setStep(2)}>
+            <Button variant="secondary" size="lg" onClick={() => setStep(0)}>
+              Back
+            </Button>
+            <Button
+              variant="primary"
+              size="lg"
+              disabled={!selectedServiceId}
+              onClick={() => setStep(2)}
+            >
               Continue
             </Button>
           </div>
@@ -159,7 +217,9 @@ export default function BookServicePage() {
                   onClick={() => setSelectedBayId(bay.id)}
                   className={cn(
                     "px-5 py-3 border rounded-sm label-uppercase transition-colors",
-                    selectedBayId === bay.id ? "border-black bg-black text-white" : "border-light-gray"
+                    selectedBayId === bay.id
+                      ? "border-black bg-black text-white"
+                      : "border-light-gray",
                   )}
                 >
                   {bay.name}
@@ -168,7 +228,9 @@ export default function BookServicePage() {
             </div>
           </div>
           <div>
-            <p className="label-uppercase text-medium-gray mb-3">Notes (optional)</p>
+            <p className="label-uppercase text-medium-gray mb-3">
+              Notes (optional)
+            </p>
             <textarea
               value={complaint}
               onChange={(e) => setComplaint(e.target.value)}
@@ -178,7 +240,9 @@ export default function BookServicePage() {
             />
           </div>
           <div className="flex gap-4 mt-4">
-            <Button variant="secondary" size="lg" onClick={() => setStep(1)}>Back</Button>
+            <Button variant="secondary" size="lg" onClick={() => setStep(1)}>
+              Back
+            </Button>
             <Button
               variant="primary"
               size="lg"
@@ -196,7 +260,9 @@ export default function BookServicePage() {
           <div className="border border-light-gray rounded-md p-8 flex flex-col gap-4">
             <div className="flex justify-between">
               <span className="text-medium-gray">Vehicle</span>
-              <span className="font-medium">{selectedCar?.make} {selectedCar?.model}</span>
+              <span className="font-medium">
+                {selectedCar?.make} {selectedCar?.model}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-medium-gray">Service</span>
@@ -204,7 +270,9 @@ export default function BookServicePage() {
             </div>
             <div className="flex justify-between">
               <span className="text-medium-gray">Date & Time</span>
-              <span className="font-medium">{selectedDate} {selectedTime}</span>
+              <span className="font-medium">
+                {selectedDate} {selectedTime}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-medium-gray">Bay</span>
@@ -212,13 +280,22 @@ export default function BookServicePage() {
             </div>
             <div className="flex justify-between border-t border-light-gray pt-4">
               <span className="text-medium-gray">Estimated Price</span>
-              <span className="font-medium">${selectedService?.base_price}</span>
+              <span className="font-medium">
+                ${selectedService?.base_price}
+              </span>
             </div>
           </div>
           {error && <p className="text-accent-red text-sm">{error}</p>}
           <div className="flex gap-4">
-            <Button variant="secondary" size="lg" onClick={() => setStep(2)}>Back</Button>
-            <Button variant="primary" size="lg" onClick={handleConfirm} disabled={submitting}>
+            <Button variant="secondary" size="lg" onClick={() => setStep(2)}>
+              Back
+            </Button>
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={handleConfirm}
+              disabled={submitting}
+            >
               {submitting ? "Booking..." : "Confirm Booking"}
             </Button>
           </div>

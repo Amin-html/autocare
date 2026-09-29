@@ -3,22 +3,44 @@
 import { useEffect, useState } from "react";
 import { appointmentsService, Appointment } from "@/services/appointments.service";
 import { carsService, Car } from "@/services/cars.service";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { ErrorState } from "@/components/ui/ErrorState";
 
 export default function HistoryPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
 
-  useEffect(() => {
+  function load() {
+    setLoading(true);
+    setError(null);
     Promise.all([appointmentsService.my(), carsService.list()])
       .then(([apptsData, carsData]) => {
         setAppointments(apptsData);
         setCars(carsData);
       })
+      .catch(setError)
       .finally(() => setLoading(false));
-  }, []);
+  }
 
-  if (loading) return <div className="py-24 text-center text-medium-gray">Loading...</div>;
+  useEffect(load, []);
+
+  if (loading) {
+    return (
+      <div className="pb-24 max-w-2xl">
+        <Skeleton className="h-3 w-24 mb-3" />
+        <Skeleton className="h-9 w-72 mb-12" />
+        <div className="flex flex-col gap-10 pl-8">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) return <ErrorState error={error} onRetry={load} />;
 
   const completed = appointments
     .filter((a) => a.status === "completed")

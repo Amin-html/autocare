@@ -6,28 +6,44 @@ import { carsService, Car } from "@/services/cars.service";
 import { appointmentsService, Appointment } from "@/services/appointments.service";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Button } from "@/components/ui/Button";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { ErrorState } from "@/components/ui/ErrorState";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [cars, setCars] = useState<Car[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
 
-  useEffect(() => {
+  function load() {
     if (!user || user.role !== "client") return;
-
+    setLoading(true);
+    setError(null);
     Promise.all([carsService.list(), appointmentsService.my()])
       .then(([carsData, apptsData]) => {
         setCars(carsData);
         setAppointments(apptsData);
       })
-      .catch(() => {
-        // роль сменится/редирект сработает — молча игнорируем, не роняя UI
-      })
+      .catch(setError)
       .finally(() => setLoading(false));
-  }, [user]);
+  }
 
-  if (loading) return <div className="py-24 text-center text-medium-gray">Loading...</div>;
+  useEffect(load, [user]);
+
+  if (loading) {
+    return (
+      <div className="pb-24">
+        <Skeleton className="h-4 w-48 mb-8" />
+        <Skeleton className="h-3 w-28 mb-4" />
+        <Skeleton className="h-40 w-full mb-12" />
+        <Skeleton className="h-3 w-40 mb-4" />
+        <Skeleton className="h-20 w-full" />
+      </div>
+    );
+  }
+
+  if (error) return <ErrorState error={error} onRetry={load} />;
 
   const myCar = cars[0];
   const upcoming = appointments.filter((a) =>
