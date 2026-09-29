@@ -89,6 +89,24 @@ def list_appointments(
         query = query.filter(func.date(Appointment.start_at) == on_date)
     return query.order_by(Appointment.start_at).all()
 
+@router.get("/{appointment_id}", response_model=AppointmentOut)
+def get_appointment(
+    appointment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    appt = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+    if not appt:
+        raise HTTPException(status_code=404, detail="Запись не найдена")
+
+    is_owner = appt.client_id == current_user.id
+    is_master = appt.master_id == current_user.id
+    is_staff = current_user.role in (UserRole.manager, UserRole.admin)
+    if not (is_owner or is_master or is_staff):
+        raise HTTPException(status_code=403, detail="Нет доступа к этой записи")
+
+    return appt
+
 @router.get("/my", response_model=list[AppointmentOut])
 def my_appointments(
     current_user: User = Depends(get_current_user),
