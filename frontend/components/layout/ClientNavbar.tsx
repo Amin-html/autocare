@@ -79,8 +79,8 @@ export function ClientNavbar() {
       </div>
 
       {open && (
-        <div className="md:hidden fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
+        <div className="md:hidden fixed inset-0 z-[60]">
+          <div className="fixed inset-0 bg-black/40" onClick={() => setOpen(false)} />
           <div className="absolute top-0 right-0 bottom-0 w-72 max-w-[80vw] bg-warm-white border-l border-light-gray p-6 flex flex-col">
             <div className="flex items-center justify-between mb-10">
               <span className="text-lg font-bold tracking-tight">AUTOCARE</span>
