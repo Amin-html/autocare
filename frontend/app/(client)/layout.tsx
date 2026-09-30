@@ -1,7 +1,7 @@
 "use client";
 
 import { useRequireRole } from "@/hooks/useRole";
-import { Navbar } from "@/components/layout/Navbar";
+import { ClientNavbar } from "@/components/layout/ClientNavbar";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useRequireRole(["client"]);
@@ -12,7 +12,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <>
-      <Navbar />
+      <ClientNavbar />
       <div className="pt-24 max-w-6xl mx-auto px-6">{children}</div>
     </>
   );

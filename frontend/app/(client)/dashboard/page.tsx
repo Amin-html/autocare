@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -59,7 +60,9 @@ export default function DashboardPage() {
         <div className="border border-light-gray rounded-md p-8 mb-12">
           <h2 className="text-3xl font-bold mb-2">{myCar.make} {myCar.model}</h2>
           <p className="text-medium-gray">{myCar.mileage.toLocaleString()} KM</p>
-          <Button variant="secondary" size="md" className="mt-6">Book Service</Button>
+          <Link href="/book">
+            <Button variant="secondary" size="md" className="mt-6">Book Service</Button>
+          </Link>
         </div>
       ) : (
         <div className="border border-light-gray rounded-md p-8 mb-12 text-center text-medium-gray">
