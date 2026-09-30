@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -9,9 +9,30 @@ const inter = Inter({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: "AutoCare — Precision in every service",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "AutoCare — Precision in every service",
+    template: "%s · AutoCare",
+  },
   description: "Professional automotive service management for your vehicle.",
+  openGraph: {
+    title: "AutoCare — Precision in every service",
+    description: "Professional automotive service management for your vehicle.",
+    url: SITE_URL,
+    siteName: "AutoCare",
+    images: ["/hero-car-placeholder.jpg"],
+    locale: "en_US",
+    type: "website",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0A0A0A",
 };
 
 export default function RootLayout({
