@@ -34,53 +34,55 @@ export function ClientNavbar() {
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-warm-white/90 backdrop-blur-sm border-b border-light-gray">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/dashboard" className="text-lg font-bold tracking-tight">
-          AUTOCARE
-        </Link>
-
-        <nav className="hidden md:flex items-center gap-8 label-uppercase text-black">
-          {LINKS.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={cn(
-                "hover:text-medium-gray transition-colors",
-                pathname === l.href && "text-medium-gray"
-              )}
-            >
-              {l.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="hidden md:flex items-center gap-6">
-          <Link href="/book">
-            <Button variant="primary" size="sm">Book Service</Button>
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-warm-white/90 backdrop-blur-sm border-b border-light-gray">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/dashboard" className="text-lg font-bold tracking-tight">
+            AUTOCARE
           </Link>
+
+          <nav className="hidden md:flex items-center gap-8 label-uppercase text-black">
+            {LINKS.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={cn(
+                  "hover:text-medium-gray transition-colors",
+                  pathname === l.href && "text-medium-gray"
+                )}
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="hidden md:flex items-center gap-6">
+            <Link href="/book">
+              <Button variant="primary" size="sm">Book Service</Button>
+            </Link>
+            <button
+              onClick={logout}
+              className="label-uppercase text-medium-gray hover:text-black transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
+
           <button
-            onClick={logout}
-            className="label-uppercase text-medium-gray hover:text-black transition-colors"
+            onClick={() => setOpen(true)}
+            aria-label="Open menu"
+            className="md:hidden flex flex-col gap-1.5 p-2 -mr-2"
           >
-            Sign out
+            <span className="block w-6 h-px bg-black" />
+            <span className="block w-6 h-px bg-black" />
+            <span className="block w-6 h-px bg-black" />
           </button>
         </div>
-
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="Open menu"
-          className="md:hidden flex flex-col gap-1.5 p-2 -mr-2"
-        >
-          <span className="block w-6 h-px bg-black" />
-          <span className="block w-6 h-px bg-black" />
-          <span className="block w-6 h-px bg-black" />
-        </button>
-      </div>
+      </header>
 
       {open && (
         <div className="md:hidden fixed inset-0 z-[60]">
-          <div className="fixed inset-0 bg-black/40" onClick={() => setOpen(false)} />
+          <div className="fixed inset-0 bg-black/70" onClick={() => setOpen(false)} />
           <div className="absolute top-0 right-0 bottom-0 w-72 max-w-[80vw] bg-warm-white border-l border-light-gray p-6 flex flex-col">
             <div className="flex items-center justify-between mb-10">
               <span className="text-lg font-bold tracking-tight">AUTOCARE</span>
@@ -128,6 +130,6 @@ export function ClientNavbar() {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }
