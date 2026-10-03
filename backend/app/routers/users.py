@@ -5,13 +5,25 @@ from app.database import get_db
 from app.core.deps import get_current_user, require_role
 from app.models.user import User, UserRole
 from app.schemas.auth import UserOut
-from app.schemas.user import RoleUpdate
+from app.schemas.user import RoleUpdate, ProfileUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("/me", response_model=UserOut)
 def read_current_user(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.patch("/me", response_model=UserOut)
+def update_my_profile(
+    data: ProfileUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    current_user.full_name = data.full_name
+    db.commit()
+    db.refresh(current_user)
     return current_user
 
 

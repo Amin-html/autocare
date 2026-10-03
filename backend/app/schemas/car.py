@@ -7,6 +7,13 @@ class CarCreate(BaseModel):
     plate: str
     mileage: int = Field(ge=0, default=0)
 
+class CarUpdate(BaseModel):
+    make: str | None = None
+    model: str | None = None
+    year: int | None = Field(default=None, ge=1900, le=2100)
+    plate: str | None = None
+    mileage: int | None = Field(default=None, ge=0)
+
 class CarOut(BaseModel):
     id: int
     owner_id: int
