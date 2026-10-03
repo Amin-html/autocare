@@ -15,4 +15,7 @@ export const carsService = {
   listAll: () => api.get<Car[]>("/cars/all"),
   get: (id: number) => api.get<Car>(`/cars/${id}`),
   create: (data: Omit<Car, "id" | "owner_id">) => api.post<Car>("/cars", data),
+  update: (id: number, data: Partial<Omit<Car, "id" | "owner_id">>) =>
+    api.patch<Car>(`/cars/${id}`, data),
+  remove: (id: number) => api.delete<void>(`/cars/${id}`),
 };
