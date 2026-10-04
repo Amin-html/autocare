@@ -139,6 +139,11 @@ def confirm_appointment(
     if appt.status != AppointmentStatus.pending:
         raise HTTPException(status_code=409, detail="Подтвердить можно только запись в статусе 'ожидает'")
 
+    if master_id:
+        master = db.query(User).filter(User.id == master_id, User.role == UserRole.master).first()
+        if not master:
+            raise HTTPException(status_code=400, detail="Указанный пользователь не является мастером")
+
     appt.status = AppointmentStatus.confirmed
     if master_id:
         appt.master_id = master_id
