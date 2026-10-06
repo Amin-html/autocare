@@ -13,6 +13,7 @@ class UserOut(BaseModel):
     email: EmailStr
     full_name: str
     role: UserRole
+    avatar_url: str | None = None
 
     class Config:
         from_attributes = True

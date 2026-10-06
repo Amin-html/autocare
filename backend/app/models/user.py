@@ -17,5 +17,6 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
     role = Column(Enum(UserRole), nullable=False, default=UserRole.client)
+    avatar_url = Column(String, nullable=True)
 
     cars = relationship("Car", back_populates="owner")
