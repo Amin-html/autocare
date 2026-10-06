@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { Avatar } from "@/components/ui/Avatar";
 
 const LINKS = [
   { href: "/garage", label: "Garage" },
@@ -56,17 +57,20 @@ export function ClientNavbar() {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/book">
-              <Button variant="primary" size="sm">Book Service</Button>
-            </Link>
-            <button
-              onClick={logout}
-              className="label-uppercase text-medium-gray hover:text-black transition-colors"
-            >
-              Sign out
-            </button>
-          </div>
+        <div className="hidden md:flex items-center gap-6">
+          <Link href="/book">
+            <Button variant="primary" size="sm">Book Service</Button>
+          </Link>
+          <Link href="/profile" aria-label="Profile">
+            <Avatar src={user?.avatar_url} name={user?.full_name || "?"} size={32} />
+          </Link>
+          <button
+            onClick={logout}
+            className="label-uppercase text-medium-gray hover:text-black transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
 
           <button
             onClick={() => setOpen(true)}
@@ -95,7 +99,16 @@ export function ClientNavbar() {
               </button>
             </div>
 
-            {user && <p className="text-sm text-medium-gray mb-6">{user.full_name}</p>}
+            {user && (
+              <Link
+                href="/profile"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 mb-6"
+              >
+                <Avatar src={user.avatar_url} name={user.full_name} size={36} />
+                <span className="text-sm text-medium-gray">{user.full_name}</span>
+              </Link>
+            )}
 
             <nav className="flex flex-col gap-6 label-uppercase mb-10">
               {LINKS.map((l) => (

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { Avatar } from "@/components/ui/Avatar";
 
 interface StaffHeaderProps {
   section: string;
@@ -31,7 +32,10 @@ export function StaffHeader({ section, links }: StaffHeaderProps) {
           )}
         </div>
         <div className="flex items-center gap-6">
-          <span className="text-sm text-medium-gray hidden sm:block">{user?.full_name}</span>
+          <Link href="/profile" className="flex items-center gap-2">
+            <Avatar src={user?.avatar_url} name={user?.full_name || "?"} size={28} />
+            <span className="text-sm text-medium-gray hidden sm:block">{user?.full_name}</span>
+          </Link>
           <button
             onClick={logout}
             className="label-uppercase hover:text-medium-gray transition-colors"

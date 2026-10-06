@@ -5,6 +5,7 @@ export interface User {
   email: string;
   full_name: string;
   role: "client" | "manager" | "master" | "admin";
+  avatar_url: string | null;
 }
 
 export async function register(data: { email: string; password: string; full_name: string }) {
