@@ -1,34 +1,51 @@
-name: autocare
+  name: autocare
 
-services:
-  backend:
-    build: ./backend
-    environment:
-      # Docker Compose автоматически подставит значение DATABASE_URL из вашего файла .env
-      DATABASE_URL: ${DATABASE_URL:?Укажите DATABASE_URL от Neon в файле .env}
-      JWT_SECRET: ${JWT_SECRET:?Создайте файл .env (см. .env.example)}
-      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
-    ports:
-      - "8000:8000"
-    volumes:
-      - uploads:/app/uploads
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 20s
+  services:
+    db:
+      image: postgres:16-alpine
+      environment:
+        POSTGRES_USER: autocare
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Создайте файл .env (см. .env.example)}
+        POSTGRES_DB: autocare
+      volumes:
+        - pgdata:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U autocare -d autocare"]
+        interval: 5s
+        timeout: 5s
+        retries: 12
 
-  frontend:
-    build:
-      context: ./frontend
-      args:
-        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
-    depends_on:
-      backend:
-        condition: service_healthy
-    ports:
-      - "3000:3000"
+    backend:
+      build: ./backend
+      environment:
+        DATABASE_URL: postgresql://autocare:${POSTGRES_PASSWORD}@db:5432/autocare
+        JWT_SECRET: ${JWT_SECRET:?Создайте файл .env (см. .env.example)}
+        SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+      depends_on:
+        db:
+          condition: service_healthy
+      ports:
+        - "8000:8000"
+      volumes:
+        - uploads:/app/uploads
+      healthcheck:
+        test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+        interval: 10s
+        timeout: 5s
+        retries: 12
+        start_period: 20s
 
-volumes:
-  uploads:
+    frontend:
+      build:
+        context: ./frontend
+        args:
+          NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+      depends_on:
+        backend:
+          condition: service_healthy
+      ports:
+        - "3000:3000"
+
+  volumes:
+    pgdata:
+    uploads:
