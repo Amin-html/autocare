@@ -1,0 +1,40 @@
+# Запуск в Docker с базой в Neon (без локального Postgres).
+# Настройки берутся из backend/.env (DATABASE_URL от Neon и JWT_SECRET).
+#
+#   docker compose -f docker-compose.neon.yml up --build
+#
+# Останавливайте так же: docker compose -f docker-compose.neon.yml down
+# Порты 8000/3000 те же, что у docker-compose.yml, поэтому одновременно можно запускать только один из вариантов.
+
+name: autocare-neon
+
+services:
+  backend:
+    build: ./backend
+    env_file:
+      - ./backend/.env
+    environment:
+      # Демо-данные в рабочую базу не заливаем: в ней уже ваши данные.
+      SEED_DEMO_DATA: "false"
+    ports:
+      - "8000:8000"
+    volumes:
+      # Та же папка, что использует локальный запуск, иначе фото из базы не найдутся.
+      - ./backend/uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
