@@ -8,14 +8,22 @@ export interface Car {
   year: number;
   plate: string;
   mileage: number;
+  photo_url: string | null;
 }
+
+type CarFields = Omit<Car, "id" | "owner_id" | "photo_url">;
 
 export const carsService = {
   list: () => api.get<Car[]>("/cars"),
   listAll: () => api.get<Car[]>("/cars/all"),
   get: (id: number) => api.get<Car>(`/cars/${id}`),
-  create: (data: Omit<Car, "id" | "owner_id">) => api.post<Car>("/cars", data),
-  update: (id: number, data: Partial<Omit<Car, "id" | "owner_id">>) =>
-    api.patch<Car>(`/cars/${id}`, data),
+  create: (data: CarFields) => api.post<Car>("/cars", data),
+  update: (id: number, data: Partial<CarFields>) => api.patch<Car>(`/cars/${id}`, data),
   remove: (id: number) => api.delete<void>(`/cars/${id}`),
+  uploadPhoto: (id: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.upload<Car>(`/cars/${id}/photo`, formData);
+  },
+  removePhoto: (id: number) => api.delete<Car>(`/cars/${id}/photo`),
 };

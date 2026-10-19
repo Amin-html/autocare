@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { carsService, Car } from "@/services/cars.service";
 import { appointmentsService, Appointment } from "@/services/appointments.service";
+import { mediaUrl } from "@/lib/format";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
 
 type CarFormState = { make: string; model: string; year: string; plate: string; mileage: string };
 const EMPTY_FORM: CarFormState = { make: "", model: "", year: "", plate: "", mileage: "" };
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
 function toForm(car: Car): CarFormState {
   return {
@@ -74,6 +76,9 @@ export default function GaragePage() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  const [photoBusyId, setPhotoBusyId] = useState<number | null>(null);
+  const [photoError, setPhotoError] = useState<{ id: number; message: string } | null>(null);
+
   function load() {
     setLoading(true);
     setError(null);
@@ -87,6 +92,10 @@ export default function GaragePage() {
   }
 
   useEffect(load, []);
+
+  function replaceCar(updated: Car) {
+    setCars((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+  }
 
   function submitAdd() {
     const err = validate(addForm);
@@ -130,7 +139,7 @@ export default function GaragePage() {
         mileage: Number(editForm.mileage),
       })
       .then((updated) => {
-        setCars((prev) => prev.map((c) => (c.id === id ? updated : c)));
+        replaceCar(updated);
         setEditingId(null);
       })
       .catch((err: Error) => setEditError(err.message))
@@ -146,6 +155,33 @@ export default function GaragePage() {
       .then(() => setCars((prev) => prev.filter((c) => c.id !== id)))
       .catch((err: Error) => setDeleteError(err.message))
       .finally(() => setDeletingId(null));
+  }
+
+  function handlePhotoSelect(car: Car, e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > MAX_PHOTO_BYTES) {
+      return setPhotoError({ id: car.id, message: "Photo must be 5 MB or smaller." });
+    }
+    setPhotoError(null);
+    setPhotoBusyId(car.id);
+    carsService
+      .uploadPhoto(car.id, file)
+      .then(replaceCar)
+      .catch((err: Error) => setPhotoError({ id: car.id, message: err.message }))
+      .finally(() => setPhotoBusyId(null));
+  }
+
+  function handlePhotoRemove(car: Car) {
+    if (!window.confirm("Remove the photo of this vehicle?")) return;
+    setPhotoError(null);
+    setPhotoBusyId(car.id);
+    carsService
+      .removePhoto(car.id)
+      .then(replaceCar)
+      .catch((err: Error) => setPhotoError({ id: car.id, message: err.message }))
+      .finally(() => setPhotoBusyId(null));
   }
 
   if (loading) {
@@ -198,6 +234,7 @@ export default function GaragePage() {
               Cancel
             </Button>
           </div>
+          <p className="text-xs text-medium-gray mt-4">You can add a photo right after saving.</p>
         </div>
       )}
 
@@ -218,6 +255,8 @@ export default function GaragePage() {
               .filter((a) => a.car_id === car.id && a.status === "completed")
               .sort((a, b) => new Date(b.start_at).getTime() - new Date(a.start_at).getTime());
             const isEditing = editingId === car.id;
+            const photo = mediaUrl(car.photo_url);
+            const photoBusy = photoBusyId === car.id;
 
             return (
               <div key={car.id} className="border border-light-gray rounded-md p-6">
@@ -236,6 +275,46 @@ export default function GaragePage() {
                   </>
                 ) : (
                   <>
+                    <div className="aspect-[16/9] w-full overflow-hidden rounded-sm bg-light-gray mb-3">
+                      {photo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={photo}
+                          alt={`${car.make} ${car.model}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center label-uppercase text-medium-gray">
+                          No photo
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-5 mb-5">
+                      <label className="label-uppercase text-medium-gray hover:text-black cursor-pointer transition-colors">
+                        {photoBusy ? "Uploading..." : photo ? "Change photo" : "Add photo"}
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          className="hidden"
+                          disabled={photoBusy}
+                          onChange={(e) => handlePhotoSelect(car, e)}
+                        />
+                      </label>
+                      {photo && (
+                        <button
+                          onClick={() => handlePhotoRemove(car)}
+                          disabled={photoBusy}
+                          className="label-uppercase text-medium-gray hover:text-accent-red transition-colors disabled:opacity-40"
+                        >
+                          Remove photo
+                        </button>
+                      )}
+                    </div>
+                    {photoError?.id === car.id && (
+                      <p className="text-accent-red text-sm mb-4">{photoError.message}</p>
+                    )}
+
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <h2 className="text-2xl font-bold">
