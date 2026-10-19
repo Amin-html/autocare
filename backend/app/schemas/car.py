@@ -22,6 +22,7 @@ class CarOut(BaseModel):
     year: int
     plate: str
     mileage: int
+    photo_url: str | None = None
 
     class Config:
         from_attributes = True
