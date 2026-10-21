@@ -8,7 +8,7 @@ import { carsService, Car } from "@/services/cars.service";
 import { servicesService, ServiceItem } from "@/services/services.service";
 import { workOrdersService, WorkOrder } from "@/services/work-orders.service";
 import { StaffStatusBadge } from "@/components/ui/StaffStatus";
-import { fmtWhen } from "@/lib/format";
+import { fmtWhen, mediaUrl } from "@/lib/format";
 
 const inputClass =
   "w-full bg-transparent border border-dark-gray focus:border-white outline-none rounded-md px-4 py-3 transition-colors";
@@ -164,6 +164,21 @@ export default function WorkOrderPage() {
             {car && <span className="font-mono ml-3">{car.plate}</span>}
           </p>
           {appt.complaint && <p className="text-sm text-medium-gray mt-3">“{appt.complaint}”</p>}
+          {appt.photo_url && (
+            <a
+              href={mediaUrl(appt.photo_url) ?? undefined}
+              target="_blank"
+              rel="noreferrer"
+              className="block mt-4 w-full max-w-sm"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={mediaUrl(appt.photo_url) ?? ""}
+                alt="Photo of the problem"
+                className="w-full rounded-md border border-dark-gray"
+              />
+            </a>
+          )}
         </div>
         <StaffStatusBadge status={appt.status} />
       </div>

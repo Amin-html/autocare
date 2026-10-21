@@ -1,19 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { appointmentsService, Appointment } from "@/services/appointments.service";
 import { AppointmentCard } from "@/components/ui/AppointmentCard";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
 
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
 export default function AppointmentsPage() {
+  useDocumentTitle("Appointments");
+
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
   const [tab, setTab] = useState<"upcoming" | "history">("upcoming");
   const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [photoBusyId, setPhotoBusyId] = useState<number | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   function load() {
     setLoading(true);
@@ -27,6 +34,10 @@ export default function AppointmentsPage() {
 
   useEffect(load, []);
 
+  function replaceAppointment(updated: Appointment) {
+    setAppointments((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+  }
+
   async function handleCancel(id: number) {
     setCancellingId(id);
     setCancelError(null);
@@ -38,6 +49,30 @@ export default function AppointmentsPage() {
     } finally {
       setCancellingId(null);
     }
+  }
+
+  function handlePhotoChange(id: number, file: File) {
+    if (file.size > MAX_PHOTO_BYTES) {
+      return setPhotoError("Photo must be 5 MB or smaller.");
+    }
+    setPhotoError(null);
+    setPhotoBusyId(id);
+    appointmentsService
+      .uploadPhoto(id, file)
+      .then(replaceAppointment)
+      .catch((err: Error) => setPhotoError(err.message))
+      .finally(() => setPhotoBusyId(null));
+  }
+
+  function handlePhotoRemove(id: number) {
+    if (!window.confirm("Remove this photo?")) return;
+    setPhotoError(null);
+    setPhotoBusyId(id);
+    appointmentsService
+      .removePhoto(id)
+      .then(replaceAppointment)
+      .catch((err: Error) => setPhotoError(err.message))
+      .finally(() => setPhotoBusyId(null));
   }
 
   if (loading) {
@@ -87,6 +122,7 @@ export default function AppointmentsPage() {
       </div>
 
       {cancelError && <p className="text-accent-red text-sm mb-6">{cancelError}</p>}
+      {photoError && <p className="text-accent-red text-sm mb-6">{photoError}</p>}
 
       {list.length > 0 ? (
         <div className="flex flex-col gap-4">
@@ -96,6 +132,9 @@ export default function AppointmentsPage() {
               appointment={appt}
               onCancel={tab === "upcoming" ? handleCancel : undefined}
               cancelling={cancellingId === appt.id}
+              onPhotoChange={tab === "upcoming" ? handlePhotoChange : undefined}
+              onPhotoRemove={tab === "upcoming" ? handlePhotoRemove : undefined}
+              photoBusy={photoBusyId === appt.id}
             />
           ))}
         </div>

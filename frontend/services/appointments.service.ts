@@ -13,6 +13,7 @@ export interface Appointment {
   end_at: string;
   status: AppointmentStatus;
   complaint: string | null;
+  photo_url: string | null;
 }
 
 export const appointmentsService = {
@@ -32,4 +33,10 @@ export const appointmentsService = {
   confirm: (id: number, masterId?: number) =>
     api.post<Appointment>(`/appointments/${id}/confirm${masterId ? `?master_id=${masterId}` : ""}`),
   start: (id: number) => api.post<Appointment>(`/appointments/${id}/start`),
+  uploadPhoto: (id: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.upload<Appointment>(`/appointments/${id}/photo`, formData);
+  },
+  removePhoto: (id: number) => api.delete<Appointment>(`/appointments/${id}/photo`),
 };
