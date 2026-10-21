@@ -96,6 +96,18 @@ def my_appointments(
 ):
     return db.query(Appointment).filter(Appointment.client_id == current_user.id).all()
 
+@router.get("/assigned", response_model=list[AppointmentOut])
+def assigned_appointments(
+    current_user: User = Depends(require_role(UserRole.master, UserRole.admin)),
+    db: Session = Depends(get_db),
+):
+    return (
+        db.query(Appointment)
+        .filter(Appointment.master_id == current_user.id)
+        .order_by(Appointment.start_at)
+        .all()
+    )
+
 @router.get("/{appointment_id}", response_model=AppointmentOut)
 def get_appointment(
     appointment_id: int,
@@ -113,18 +125,6 @@ def get_appointment(
         raise HTTPException(status_code=403, detail="Нет доступа к этой записи")
 
     return appt
-
-@router.get("/assigned", response_model=list[AppointmentOut])
-def assigned_appointments(
-    current_user: User = Depends(require_role(UserRole.master, UserRole.admin)),
-    db: Session = Depends(get_db),
-):
-    return (
-        db.query(Appointment)
-        .filter(Appointment.master_id == current_user.id)
-        .order_by(Appointment.start_at)
-        .all()
-    )
 
 @router.post("/{appointment_id}/confirm", response_model=AppointmentOut)
 def confirm_appointment(

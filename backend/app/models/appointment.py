@@ -23,6 +23,7 @@ class Appointment(Base):
     end_at = Column(DateTime(timezone=True), nullable=False)
     status = Column(Enum(AppointmentStatus), nullable=False, default=AppointmentStatus.pending)
     complaint = Column(String, nullable=True)
+    photo_url = Column(String, nullable=True)
 
     car = relationship("Car", back_populates="appointments")
     work_order = relationship("WorkOrder", back_populates="appointment", uselist=False)

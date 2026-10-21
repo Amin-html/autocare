@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.routers import auth, users, cars, services, bays, appointments, work_orders
+from app.routers import auth, users, cars, services, bays, appointments, appointment_photos, work_orders
 
 app = FastAPI(title="AutoCare API")
 
@@ -24,6 +24,7 @@ app.include_router(cars.router)
 app.include_router(services.router)
 app.include_router(bays.router)
 app.include_router(appointments.router)
+app.include_router(appointment_photos.router)
 app.include_router(work_orders.router)
 
 

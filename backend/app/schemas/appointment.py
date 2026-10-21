@@ -21,6 +21,7 @@ class AppointmentOut(BaseModel):
     end_at: datetime
     status: AppointmentStatus
     complaint: str | None
+    photo_url: str | None = None
 
     class Config:
         from_attributes = True
