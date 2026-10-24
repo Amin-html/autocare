@@ -2,6 +2,11 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Hello this is our project AutoCare!
+This project was development by Admin and Beksultan!
+Welcome to our project!
+
+
 First, run the development server:
 
 ```bash
