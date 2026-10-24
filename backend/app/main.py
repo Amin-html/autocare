@@ -10,7 +10,10 @@ os.makedirs("uploads/avatars", exist_ok=True)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # адрес frontend в dev-режиме
+    allow_origins=[
+        "http://localhost:3000",
+        "https://autocare-liard.vercel.app"
+                   ],  # адрес frontend в dev-режиме
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
