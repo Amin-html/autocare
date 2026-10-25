@@ -1,10 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import { mediaUrl } from "@/lib/format";
 
 export function Avatar({ src, name, size = 40 }: { src: string | null | undefined; name: string; size?: number }) {
   const url = mediaUrl(src);
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const initial = name.trim().charAt(0).toUpperCase() || "?";
 
-  if (url) {
+  if (url && failedUrl !== url) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
@@ -13,6 +17,7 @@ export function Avatar({ src, name, size = 40 }: { src: string | null | undefine
         width={size}
         height={size}
         style={{ width: size, height: size }}
+        onError={() => setFailedUrl(url)}
         className="rounded-full object-cover border border-light-gray"
       />
     );
