@@ -11,6 +11,20 @@
   --color-light-gray: #E5E5E2;
   --color-accent-red: #D50000;
 
+  /* Тёмная тема (этап 1: только главная) — Nardo Grey + Neon Lime */
+  --color-night: #080D11;
+  --color-surface: #101820;
+  --color-surface-2: #17212A;
+  --color-nardo: #343B42;
+  --color-line: #29343D;
+  --color-fg: #F3F6F7;
+  --color-fg-muted: #9AA7B0;
+  --color-lime: #C7FF2F;
+  --color-lime-hover: #D8FF69;
+  --color-ok: #28C783;
+  --color-danger: #FF4D55;
+  --color-warn: #FFAD42;
+
   /* Типографика */
   --font-sans: var(--font-inter), -apple-system, sans-serif;
 
@@ -42,4 +56,43 @@
   line-height: 1.05;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+/* Анимации главной: появление снизу + мягкое «дыхание» свечения */
+@keyframes ac-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ac-slide-in {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes ac-glow {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 0.9; }
+}
+
+.ac-rise {
+  opacity: 0;
+  animation: ac-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--ac-delay, 0ms);
+}
+.ac-slide-in {
+  opacity: 0;
+  animation: ac-slide-in 1000ms cubic-bezier(0.22, 1, 0.36, 1) 150ms forwards;
+}
+.ac-glow {
+  animation: ac-glow 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-rise,
+  .ac-slide-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .ac-glow {
+    animation: none;
+  }
 }
