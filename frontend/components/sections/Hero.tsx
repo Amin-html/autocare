@@ -1,37 +1,62 @@
-import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/ButtonLink";
+import { HeroVisual } from "./HeroVisual";
+
+const HIGHLIGHTS = [
+  { title: "Онлайн-запись", text: "Выберите автомобиль, услугу и удобное время." },
+  { title: "Личный гараж", text: "Ваши автомобили и фотографии в одном кабинете." },
+  { title: "История обслуживания", text: "Выполненные работы по каждому визиту." },
+];
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center pt-16 overflow-hidden">
-      <div className="relative z-10 text-center px-6">
-        <p className="label-uppercase text-medium-gray mb-4">Autocare</p>
-        <h1 className="text-hero mb-8">
-          PRECISION<br />IN EVERY SERVICE.
-        </h1>
-        <p className="text-medium-gray text-lg mb-10 max-w-xl mx-auto">
-          Professional automotive service management for your vehicle.
-        </p>
-        <Link href="/book">
-          <Button variant="primary" size="lg">Book a Service</Button>
-        </Link>
+    <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-night pt-[72px]">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-6 py-12 lg:py-20">
+        <div className="max-w-xl">
+          <p
+            className="ac-rise mb-6 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-fg-muted"
+            style={{ "--ac-delay": "0ms" } as React.CSSProperties}
+          >
+            <span className="h-px w-8 bg-lime" aria-hidden />
+            Premium car service
+          </p>
+          <h1
+            className="ac-rise text-[clamp(2.5rem,6.2vw,4.75rem)] font-bold leading-[1.04] tracking-[-0.025em] text-fg"
+            style={{ "--ac-delay": "100ms" } as React.CSSProperties}
+          >
+            Точность
+            <br />в каждом <span className="text-lime">обслуживании</span>
+          </h1>
+          <p
+            className="ac-rise mt-6 max-w-md text-base leading-relaxed text-fg-muted sm:text-lg"
+            style={{ "--ac-delay": "220ms" } as React.CSSProperties}
+          >
+            Запись в автосервис онлайн, личный гараж и история обслуживания вашего автомобиля — в одном месте.
+          </p>
+          <div
+            className="ac-rise mt-10 flex flex-col gap-3 sm:flex-row"
+            style={{ "--ac-delay": "340ms" } as React.CSSProperties}
+          >
+            <ButtonLink href="/book" variant="accent">
+              Записаться на сервис
+            </ButtonLink>
+            <ButtonLink href="/#services" variant="outline-light">
+              Услуги
+            </ButtonLink>
+          </div>
+        </div>
       </div>
 
-      <div className="relative w-full max-w-5xl mx-auto mt-16 aspect-[16/9] px-6">
-        <div className="relative w-full h-full rounded-md overflow-hidden bg-light-gray">
-          <Image
-            src="/hero-car-placeholder.jpg"
-            alt="BMW M3"
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 1024px"
-            className="object-cover"
-          />
-        </div>
-        <p className="label-uppercase text-medium-gray mt-4 text-center">
-          BMW M3 / 48 320 KM
-        </p>
+      <HeroVisual />
+
+      <div className="relative z-10 border-t border-line bg-night/70 backdrop-blur-md">
+        <ul className="mx-auto grid max-w-7xl gap-px px-6 sm:grid-cols-3">
+          {HIGHLIGHTS.map((h) => (
+            <li key={h.title} className="py-5 sm:py-6 sm:pr-8">
+              <p className="text-sm font-semibold text-fg">{h.title}</p>
+              <p className="mt-1 text-sm text-fg-muted">{h.text}</p>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
