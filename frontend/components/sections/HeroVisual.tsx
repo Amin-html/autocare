@@ -41,7 +41,7 @@ export function HeroVisual() {
       {photo ? (
         <div className="absolute inset-0 flex items-center">
           <div
-            className={`relative ${PHOTO_ASPECT} -ml-[20%] w-[170%] max-w-none lg:ml-0 lg:w-[125%]`}
+            className={`relative ${PHOTO_ASPECT} -ml-[6%] w-[150%] max-w-none lg:ml-0 lg:w-[125%]`}
           >
             {/* на мобильном — только вертикальные края, на lg — ещё и левый */}
             <div className="absolute inset-0 lg:hidden" style={MOBILE_MASK}>
@@ -50,7 +50,7 @@ export function HeroVisual() {
                 alt="Спортивный автомобиль в гараже"
                 fill
                 priority
-                sizes="170vw"
+                sizes="150vw"
                 className="object-cover"
               />
             </div>
