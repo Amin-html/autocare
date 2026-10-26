@@ -1,20 +1,14 @@
-import os
-import uuid
-
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.core.deps import get_current_user, require_role
+from app.core.uploads import delete_upload, save_image
 from app.models.user import User, UserRole
 from app.schemas.auth import UserOut
 from app.schemas.user import RoleUpdate, ProfileUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-ALLOWED_AVATAR_TYPES = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}
-MAX_AVATAR_SIZE = 5 * 1024 * 1024  # 5 MB
-AVATAR_DIR = os.path.join("uploads", "avatars")
 
 
 @router.get("/me", response_model=UserOut)
@@ -40,20 +34,9 @@ async def upload_my_avatar(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if file.content_type not in ALLOWED_AVATAR_TYPES:
-        raise HTTPException(status_code=400, detail="Поддерживаются только JPEG, PNG и WEBP")
-
-    contents = await file.read()
-    if len(contents) > MAX_AVATAR_SIZE:
-        raise HTTPException(status_code=400, detail="Файл не должен превышать 5 МБ")
-
-    os.makedirs(AVATAR_DIR, exist_ok=True)
-    ext = ALLOWED_AVATAR_TYPES[file.content_type]
-    filename = f"{uuid.uuid4().hex}.{ext}"
-    with open(os.path.join(AVATAR_DIR, filename), "wb") as f:
-        f.write(contents)
-
-    current_user.avatar_url = f"/uploads/avatars/{filename}"
+    old_url = current_user.avatar_url
+    current_user.avatar_url = await save_image(file, "avatars", db)
+    delete_upload(old_url, db)
     db.commit()
     db.refresh(current_user)
     return current_user

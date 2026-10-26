@@ -2,10 +2,11 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.routers import auth, users, cars, services, bays, appointments, appointment_photos, work_orders
+from app.routers import auth, users, cars, services, bays, appointments, appointment_photos, work_orders, files
 
 app = FastAPI(title="AutoCare API")
 
+# /uploads оставлен только для старых файлов на диске; новые картинки лежат в БД и отдаются через /files
 os.makedirs("uploads/avatars", exist_ok=True)
 
 app.add_middleware(
@@ -29,6 +30,7 @@ app.include_router(bays.router)
 app.include_router(appointments.router)
 app.include_router(appointment_photos.router)
 app.include_router(work_orders.router)
+app.include_router(files.router)
 
 
 @app.get("/health")
