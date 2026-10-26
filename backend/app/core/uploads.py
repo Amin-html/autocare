@@ -2,8 +2,12 @@ import os
 import uuid
 
 from fastapi import HTTPException, UploadFile
+from sqlalchemy.orm import Session
 
-UPLOAD_ROOT = "uploads"
+from app.models.stored_file import StoredFile
+
+FILES_PREFIX = "/files/"
+LEGACY_UPLOAD_ROOT = "uploads"  # старые файлы на диске (до перехода на хранение в БД)
 MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5 MB
 ALLOWED_IMAGE_TYPES = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}
 
@@ -19,8 +23,11 @@ def _looks_like(content_type: str, data: bytes) -> bool:
     return False
 
 
-async def save_image(file: UploadFile, subdir: str) -> str:
-    """Сохраняет картинку в uploads/<subdir>/ и возвращает URL вида /uploads/<subdir>/<имя>."""
+async def save_image(file: UploadFile, kind: str, db: Session) -> str:
+    """Кладёт картинку в таблицу stored_files и возвращает URL вида /files/<id>.
+
+    Коммит делает вызывающий код: строка файла и ссылка на неё сохраняются одной транзакцией.
+    """
     if file.content_type not in ALLOWED_IMAGE_TYPES:
         raise HTTPException(status_code=400, detail="Поддерживаются только JPEG, PNG и WEBP")
 
@@ -32,19 +39,35 @@ async def save_image(file: UploadFile, subdir: str) -> str:
     if not _looks_like(file.content_type, data):
         raise HTTPException(status_code=400, detail="Содержимое файла не похоже на изображение")
 
-    folder = os.path.join(UPLOAD_ROOT, subdir)
-    os.makedirs(folder, exist_ok=True)
-    filename = f"{uuid.uuid4().hex}.{ALLOWED_IMAGE_TYPES[file.content_type]}"
-    with open(os.path.join(folder, filename), "wb") as f:
-        f.write(data)
-    return f"/{UPLOAD_ROOT}/{subdir}/{filename}"
+    file_id = uuid.uuid4().hex
+    db.add(
+        StoredFile(
+            id=file_id,
+            kind=kind,
+            content_type=file.content_type,
+            size=len(data),
+            data=data,
+        )
+    )
+    db.flush()
+    return f"{FILES_PREFIX}{file_id}"
 
 
-def delete_upload(url: str | None) -> None:
-    """Удаляет ранее загруженный файл. Ничего не делает, если путь вне uploads/."""
-    if not url or not url.startswith(f"/{UPLOAD_ROOT}/"):
+def delete_upload(url: str | None, db: Session) -> None:
+    """Удаляет ранее загруженную картинку. Коммит — на вызывающем коде.
+
+    Понимает и новые URL (/files/<id>), и старые (/uploads/...): для старых удаляет файл с диска, если он ещё есть.
+    """
+    if not url:
         return
-    root = os.path.abspath(UPLOAD_ROOT)
-    path = os.path.abspath(url.lstrip("/"))
-    if path.startswith(root + os.sep) and os.path.isfile(path):
-        os.remove(path)
+
+    if url.startswith(FILES_PREFIX):
+        file_id = url[len(FILES_PREFIX):]
+        db.query(StoredFile).filter(StoredFile.id == file_id).delete(synchronize_session=False)
+        return
+
+    if url.startswith(f"/{LEGACY_UPLOAD_ROOT}/"):
+        root = os.path.abspath(LEGACY_UPLOAD_ROOT)
+        path = os.path.abspath(url.lstrip("/"))
+        if path.startswith(root + os.sep) and os.path.isfile(path):
+            os.remove(path)

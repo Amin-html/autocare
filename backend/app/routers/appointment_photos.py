@@ -39,12 +39,12 @@ async def upload_appointment_photo(
 ):
     appt = _get_editable(db, appointment_id, current_user)
 
-    new_url = await save_image(file, "appointments")
+    new_url = await save_image(file, "appointments", db)
     old_url = appt.photo_url
     appt.photo_url = new_url
+    delete_upload(old_url, db)
     db.commit()
     db.refresh(appt)
-    delete_upload(old_url)
     return appt
 
 
@@ -58,7 +58,7 @@ def delete_appointment_photo(
 
     old_url = appt.photo_url
     appt.photo_url = None
+    delete_upload(old_url, db)
     db.commit()
     db.refresh(appt)
-    delete_upload(old_url)
     return appt

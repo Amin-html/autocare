@@ -103,12 +103,12 @@ async def upload_car_photo(
     car = _get_car_or_404(db, car_id)
     _check_owner_or_admin(car, current_user)
 
-    new_url = await save_image(file, "cars")
+    new_url = await save_image(file, "cars", db)
     old_url = car.photo_url
     car.photo_url = new_url
+    delete_upload(old_url, db)
     db.commit()
     db.refresh(car)
-    delete_upload(old_url)
     return car
 
 
@@ -123,9 +123,9 @@ def delete_car_photo(
 
     old_url = car.photo_url
     car.photo_url = None
+    delete_upload(old_url, db)
     db.commit()
     db.refresh(car)
-    delete_upload(old_url)
     return car
 
 
@@ -147,5 +147,5 @@ def delete_car(
 
     old_url = car.photo_url
     db.delete(car)
+    delete_upload(old_url, db)
     db.commit()
-    delete_upload(old_url)
