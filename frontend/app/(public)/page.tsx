@@ -1,6 +1,7 @@
 import { PublicNavbar } from "@/components/layout/PublicNavbar";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
+import { HowItWorks } from "@/components/sections/HowItWorks";
 import { ServicesPreview } from "@/components/sections/ServicesPreview";
 
 export default function Home() {
@@ -10,6 +11,7 @@ export default function Home() {
       <main>
         <Hero />
         <ServicesPreview />
+        <HowItWorks />
       </main>
       <Footer />
     </div>
