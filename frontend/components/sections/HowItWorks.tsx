@@ -59,8 +59,8 @@ export function HowItWorks() {
   return (
     <section id="how-it-works" className="scroll-mt-20 border-t border-line bg-night py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-6">
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-fg-muted">Процесс</p>
-        <h2 className="mt-3 text-3xl font-bold tracking-tight text-fg sm:text-4xl">Как это работает</h2>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-fg-muted">Как это работает</p>
+        <h2 className="mt-3 text-3xl font-bold tracking-tight text-fg sm:text-4xl">Просто и удобно</h2>
 
         <ol className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((step, i) => (
@@ -70,6 +70,13 @@ export function HowItWorks() {
                 aria-hidden
                 className="absolute -top-px left-0 h-px w-10 bg-lime transition-all duration-300 group-hover:w-20"
               />
+              {i < STEPS.length - 1 && (
+                <span aria-hidden className="absolute -right-6 top-[54px] hidden h-4 w-4 -translate-y-1/2 text-fg-muted/50 lg:block">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 8h10M9 4l4 4-4 4" />
+                  </svg>
+                </span>
+              )}
               <div className="flex items-center gap-4">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-lime/40 bg-surface text-xs font-semibold tracking-wider text-lime">
                   {String(i + 1).padStart(2, "0")}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Avatar } from "@/components/ui/Avatar";
+import { Logo } from "@/components/ui/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -48,11 +49,7 @@ export function PublicNavbar() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const logo = (
-    <span className="text-lg font-bold tracking-tight text-fg">
-      AUTO<span className="text-lime">CARE</span>
-    </span>
-  );
+  const logo = <Logo />;
 
   return (
     <>

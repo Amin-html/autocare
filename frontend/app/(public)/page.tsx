@@ -1,8 +1,9 @@
 import { PublicNavbar } from "@/components/layout/PublicNavbar";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
+import { PopularServices } from "@/components/sections/PopularServices";
 import { HowItWorks } from "@/components/sections/HowItWorks";
-import { ServicesPreview } from "@/components/sections/ServicesPreview";
+import { FinalBanner } from "@/components/sections/FinalBanner";
 
 export default function Home() {
   return (
@@ -10,8 +11,9 @@ export default function Home() {
       <PublicNavbar />
       <main>
         <Hero />
-        <ServicesPreview />
+        <PopularServices />
         <HowItWorks />
+        <FinalBanner />
       </main>
       <Footer />
     </div>
