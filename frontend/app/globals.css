@@ -96,3 +96,18 @@
     animation: none;
   }
 }
+
+@keyframes ac-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.ac-fade-in {
+  opacity: 0;
+  animation: ac-fade 900ms ease-out 100ms forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ac-fade-in {
+    animation: none;
+    opacity: 1;
+  }
+}

@@ -9,8 +9,8 @@ const HIGHLIGHTS = [
 
 export function Hero() {
   return (
-    <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-night pt-[72px]">
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-6 py-12 lg:py-20">
+    <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-night pt-[72px] lg:min-h-[min(100svh,780px)]">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-6 py-12 lg:py-16">
         <div className="max-w-xl">
           <p
             className="ac-rise mb-6 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-fg-muted"
@@ -20,7 +20,7 @@ export function Hero() {
             Premium car service
           </p>
           <h1
-            className="ac-rise text-[clamp(2.5rem,6.2vw,4.75rem)] font-bold leading-[1.04] tracking-[-0.025em] text-fg"
+            className="ac-rise text-[clamp(2.5rem,5vw,4.25rem)] font-bold leading-[1.04] tracking-[-0.025em] text-fg"
             style={{ "--ac-delay": "100ms" } as React.CSSProperties}
           >
             Точность
